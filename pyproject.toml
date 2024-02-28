@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "watchlist"
+version = "0.1.0"
+description = ""
+authors = ["Sarah Wang <millimillenary@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+autopep8 = "^2.0.4"
+isort = "^5.13.2"
+lxml = "^5.1.0"
+mypy = "^1.8.0"
+pylint = "^3.1.0"
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = [
+    "missing-module-docstring", # C0114
+    "missing-function-docstring", # C0116
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
