@@ -18,6 +18,7 @@ pylint = "^3.1.0"
 [tool.pylint."MESSAGES CONTROL"]
 disable = [
     "missing-module-docstring", # C0114
+    "missing-class-docstring", # C0115
     "missing-function-docstring", # C0116
 ]
 
