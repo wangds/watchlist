@@ -2,6 +2,8 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from sqlite3 import Connection, connect
 
+from watchlist.items import WatchlistItem
+
 
 class Database:
     def __init__(self, conn: Connection) -> None:
@@ -28,6 +30,14 @@ class Database:
             "INSERT INTO watchlist(description, url) VALUES (?, ?)",
             (description, url))
         self.conn.commit()
+
+    def select_watchlist(self) -> list[WatchlistItem]:
+        cur = self.conn.cursor()
+        cur.execute("""
+            SELECT id, description, url, date, price, discount
+            FROM watchlist ORDER BY description, price NULLS LAST, url
+            """)
+        return [WatchlistItem(*x) for x in cur.fetchall()]
 
 
 def open_database_unmanaged() -> Database:
