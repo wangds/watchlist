@@ -39,6 +39,14 @@ class Database:
             """)
         return [WatchlistItem(*x) for x in cur.fetchall()]
 
+    def select_outdated_watchlist(self, today: str) -> list[WatchlistItem]:
+        cur = self.conn.cursor()
+        cur.execute("""
+            SELECT id, description, url, date, price, discount
+            FROM watchlist WHERE date IS NULL OR date<>?
+            """, (today,))
+        return [WatchlistItem(*x) for x in cur.fetchall()]
+
 
 def open_database_unmanaged() -> Database:
     filename = "watchlist.db"

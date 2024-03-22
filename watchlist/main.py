@@ -1,7 +1,8 @@
+import itertools
 from argparse import ArgumentParser, Namespace
 
 from watchlist.database import open_database
-from watchlist.util import domain_name, format_price
+from watchlist.util import domain_name, format_price, today
 
 
 def main_insert(args: Namespace) -> None:
@@ -26,6 +27,17 @@ def main_list(_args: Namespace) -> None:
             f" | {item.url}")
 
 
+def main_update(_args: Namespace) -> None:
+    with open_database() as db:
+        items = db.select_outdated_watchlist(today())
+    item_groups = itertools.groupby(
+        sorted(items, key=lambda item: item.url),
+        lambda item: domain_name(item.url))
+
+    for domain, group in item_groups:
+        print(domain, list(group))
+
+
 def main() -> None:
     parser = ArgumentParser(prog="watchlist")
     subparsers = parser.add_subparsers(required=True)
@@ -41,6 +53,11 @@ def main() -> None:
         "list",
         help="list items in the watchlist")
     list_parser.set_defaults(func=main_list)
+
+    update_parser = subparsers.add_parser(
+        "update",
+        help="update items in the watchlist")
+    update_parser.set_defaults(func=main_update)
 
     args = parser.parse_args()
     args.func(args)
