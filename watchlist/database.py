@@ -47,6 +47,13 @@ class Database:
             """, (today,))
         return [WatchlistItem(*x) for x in cur.fetchall()]
 
+    def update_watchlist(self, item: WatchlistItem) -> None:
+        cur = self.conn.cursor()
+        cur.execute(
+            "UPDATE watchlist SET date=?, price=?, discount=? WHERE id=?",
+            (item.date, item.price, item.discount, item.id))
+        self.conn.commit()
+
 
 def open_database_unmanaged() -> Database:
     filename = "watchlist.db"

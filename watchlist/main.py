@@ -1,6 +1,8 @@
 import itertools
 from argparse import ArgumentParser, Namespace
 
+from scrapy.utils.project import get_project_settings
+
 from watchlist.database import open_database
 from watchlist.util import domain_name, format_price, today
 
@@ -27,15 +29,21 @@ def main_list(_args: Namespace) -> None:
             f" | {item.url}")
 
 
-def main_update(_args: Namespace) -> None:
+def main_update(args: Namespace) -> None:
     with open_database() as db:
         items = db.select_outdated_watchlist(today())
     item_groups = itertools.groupby(
         sorted(items, key=lambda item: item.url),
         lambda item: domain_name(item.url))
 
+    settings = get_project_settings()
+    settings.set(
+        "ITEM_PIPELINES",
+        {"watchlist.pipelines.DatabaseWriterPipeline": 300})
+
     for domain, group in item_groups:
         print(domain, list(group))
+    main_list(args)
 
 
 def main() -> None:
