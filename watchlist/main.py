@@ -1,10 +1,18 @@
 import itertools
 from argparse import ArgumentParser, Namespace
 
+from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
 from watchlist.database import open_database
+from watchlist.spider import Spider
 from watchlist.util import domain_name, format_price, today
+
+
+def get_spider(domain: str) -> type[Spider]:
+    match domain:
+        case domain:
+            raise NotImplementedError(domain)
 
 
 def main_insert(args: Namespace) -> None:
@@ -40,9 +48,13 @@ def main_update(args: Namespace) -> None:
     settings.set(
         "ITEM_PIPELINES",
         {"watchlist.pipelines.DatabaseWriterPipeline": 300})
+    process = CrawlerProcess(settings)
 
     for domain, group in item_groups:
-        print(domain, list(group))
+        if spider := get_spider(domain):
+            process.crawl(spider, start_items=list(group))
+
+    process.start()
     main_list(args)
 
 

@@ -24,6 +24,7 @@ disable = [
     "missing-module-docstring", # C0114
     "missing-class-docstring", # C0115
     "missing-function-docstring", # C0116
+    "import-outside-toplevel", # C0415
 ]
 ignore = "settings.py"
 
