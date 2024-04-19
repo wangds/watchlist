@@ -31,20 +31,53 @@ class Database:
             (description, url))
         self.conn.commit()
 
-    def select_watchlist(self) -> list[WatchlistItem]:
+    def select_watchlist(
+        self,
+        desc_filter: None | str,
+        url_filter: None | str,
+        only_most_recent: bool,
+    ) -> list[WatchlistItem]:
+        filters = []
+        params = []
+
+        if desc_filter:
+            filters.append("description LIKE '%'||?||'%'")
+            params.append(desc_filter)
+        if url_filter:
+            filters.append("url LIKE '%'||?||'%'")
+            params.append(url_filter)
+        if only_most_recent:
+            filters.append("date=(SELECT MAX(date) from watchlist)")
+
+        where_clause = ("WHERE " + " AND ".join(filters)) if filters else ""
+
         cur = self.conn.cursor()
-        cur.execute("""
+        cur.execute(f"""
             SELECT id, description, url, date, price, discount
-            FROM watchlist ORDER BY description, price NULLS LAST, url
-            """)
+            FROM watchlist {where_clause}
+            ORDER BY description, price NULLS LAST, url
+            """, params)
         return [WatchlistItem(*x) for x in cur.fetchall()]
 
-    def select_outdated_watchlist(self, today: str) -> list[WatchlistItem]:
+    def select_outdated_watchlist(
+        self,
+        today: str,
+        url_filter: None | str,
+    ) -> list[WatchlistItem]:
+        filters = ["WHERE (date IS NULL OR date<>?)"]
+        params = [today]
+
+        if url_filter:
+            filters.append("url LIKE '%'||?||'%'")
+            params.append(url_filter)
+
+        where_clause = " AND ".join(filters)
+
         cur = self.conn.cursor()
-        cur.execute("""
+        cur.execute(f"""
             SELECT id, description, url, date, price, discount
-            FROM watchlist WHERE date IS NULL OR date<>?
-            """, (today,))
+            FROM watchlist {where_clause}
+            """, params)
         return [WatchlistItem(*x) for x in cur.fetchall()]
 
     def update_watchlist(self, item: WatchlistItem) -> None:

@@ -23,9 +23,12 @@ def main_insert(args: Namespace) -> None:
     print(f"Inserted: {args.desc} ({domain})")
 
 
-def main_list(_args: Namespace) -> None:
+def main_list(args: Namespace) -> None:
     with open_database() as db:
-        items = db.select_watchlist()
+        items = db.select_watchlist(
+            desc_filter=args.desc,
+            url_filter=args.url,
+            only_most_recent=not args.include_outdated)
     desc_width = max((len(item.description) for item in items), default=0)
     for item in items:
         price = format_price(item.price)
@@ -39,7 +42,7 @@ def main_list(_args: Namespace) -> None:
 
 def main_update(args: Namespace) -> None:
     with open_database() as db:
-        items = db.select_outdated_watchlist(today())
+        items = db.select_outdated_watchlist(today(), args.url)
     item_groups = itertools.groupby(
         sorted(items, key=lambda item: item.url),
         lambda item: domain_name(item.url))
@@ -55,7 +58,11 @@ def main_update(args: Namespace) -> None:
             process.crawl(spider, start_items=list(group))
 
     process.start()
-    main_list(args)
+    main_list(Namespace(
+        desc=None,
+        url=args.url,
+        include_outdated=False,
+    ))
 
 
 def main() -> None:
@@ -72,11 +79,18 @@ def main() -> None:
     list_parser = subparsers.add_parser(
         "list",
         help="list items in the watchlist")
+    list_parser.add_argument("-d", "--desc")
+    list_parser.add_argument("-u", "--url")
+    list_parser.add_argument(
+        "--include-outdated",
+        action="store_true",
+        help="include items whose prices are not up-to-date")
     list_parser.set_defaults(func=main_list)
 
     update_parser = subparsers.add_parser(
         "update",
         help="update items in the watchlist")
+    update_parser.add_argument("-u", "--url")
     update_parser.set_defaults(func=main_update)
 
     args = parser.parse_args()
