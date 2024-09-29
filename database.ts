@@ -21,7 +21,7 @@ const DatabaseSchema = `
   );
 `;
 
-interface WatchlistDbItem {
+export interface WatchlistDbItem {
   id: number;
   description: string;
   url: string;

@@ -1,0 +1,60 @@
+span.linkhost {
+  color: #888;
+  font-size: 75%;
+  margin-left: 3px;
+}
+
+table.watchlist {
+  border: 1px solid;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table.watchlist td,
+table.watchlist th {
+  padding: 0.5em 1em;
+}
+
+/* Item */
+table.watchlist td:nth-child(1) {
+  text-align: left;
+}
+
+/* Record/Paused, Last Updated */
+table.watchlist td:nth-child(2),
+table.watchlist td:nth-child(3) {
+  color: #888;
+  font-size: 85%;
+  text-align: center;
+}
+
+/* Last Updated */
+table.watchlist td:nth-child(3) {
+  min-width: 10ch;
+}
+
+/* Historical Low, Current Price, Discount */
+table.watchlist td:nth-child(4),
+table.watchlist td:nth-child(5),
+table.watchlist td:nth-child(6) {
+  text-align: right;
+}
+
+table.watchlist th {
+  background-color: lightgrey;
+  border-bottom: 1px solid;
+  text-align: center;
+}
+
+/* Item */
+table.watchlist th:nth-child(1) {
+  width: 60%;
+}
+
+table.watchlist tr:nth-child(even) {
+  background-color: lightcyan;
+}
+
+table.watchlist tr:hover {
+  background-color: lightyellow;
+}
