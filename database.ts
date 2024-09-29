@@ -20,6 +20,17 @@ const DatabaseSchema = `
   );
 `;
 
+interface WatchlistDbItem {
+  id: number;
+  description: string;
+  url: string;
+  keepMonitoring: boolean;
+  dateUpdated?: string;
+  lowestPrice?: number;
+  currentPrice?: number;
+  currentDiscount?: number;
+}
+
 export class DatabaseReadOnly {
   constructor(db: sqlite3.Database) {
     this.db = db;
@@ -34,6 +45,28 @@ export class DatabaseReadOnly {
 
   close(): void {
     this.db.close();
+  }
+
+  /**
+   * Watchlist table
+   */
+  getItems(): Promise<WatchlistDbItem[]> {
+    const sql = `
+      SELECT
+        id, description, url, keepMonitoring,
+        dateUpdated, lowestPrice, currentPrice, currentDiscount
+      FROM watchlist;
+    `;
+
+    return new Promise((resolve, reject) => {
+      this.db.all(sql, [], (err, rows: WatchlistDbItem[]) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
   }
 }
 
