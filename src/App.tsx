@@ -1,23 +1,29 @@
-import { ReactNode, useEffect, useState } from "react";
+import {
+  MutableRefObject,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { WatchlistDbItem } from "../database";
 import WatchlistView from "./WatchlistView";
 import "./App.css";
 
+/**
+ * Results of a fetch request, persists across renders.
+ * Key: url
+ * Value: fetch result, or undefined if fetch in progress
+ */
+type Cache = Record<string, object | undefined>;
+
 function App(): ReactNode {
+  const cacheRef = useRef<Cache>({});
   const [items, setItems] = useState<WatchlistDbItem[]>([]);
 
   useEffect(() => {
-    setItems([
-      {
-        id: 1,
-        description: "dummy",
-        url: "http://localhost",
-        keepMonitoring: true,
-        dateUpdated: "2001-02-03",
-        lowestPrice: 100,
-        currentPrice: 200,
-      },
-    ]);
+    fetchCached(cacheRef, "/api/items", (res) => {
+      setItems(res as WatchlistDbItem[]);
+    });
   }, []);
 
   return (
@@ -25,6 +31,41 @@ function App(): ReactNode {
       <WatchlistView items={items} />
     </>
   );
+}
+
+/**
+ * Helper function to fetch external data asynchronously from useEffect().
+ * Persists the fetch result into cacheRef.
+ */
+function fetchCached(
+  cacheRef: MutableRefObject<Cache>,
+  url: string,
+  callback: (res: object) => void,
+): void {
+  async function fetchJson(): Promise<object> {
+    if (!(url in cacheRef.current)) {
+      cacheRef.current[url] = undefined;
+      const res = await fetch(url);
+      cacheRef.current[url] = (await res.json()) as object;
+    }
+
+    // React strict mode calls the API twice in development mode.  If the first
+    // fetch was started but has not yet finished, the second fetch will wait
+    // for it to complete here instead of making a second request.
+    while (cacheRef.current[url] === undefined) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    return cacheRef.current[url];
+  }
+
+  fetchJson()
+    .then((res) => {
+      callback(res);
+    })
+    .catch((err: unknown) => {
+      console.error(err);
+    });
 }
 
 export default App;
