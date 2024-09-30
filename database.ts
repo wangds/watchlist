@@ -1,4 +1,5 @@
 import sqlite3 from "sqlite3";
+import util from "./util";
 
 const DatabaseFilePath = "./watchlist.db";
 
@@ -29,6 +30,11 @@ interface WatchlistDbItem {
   lowestPrice?: number;
   currentPrice?: number;
   currentDiscount?: number;
+}
+
+interface ScriptsDbItem {
+  domainName: string;
+  javascript: string;
 }
 
 export class DatabaseReadOnly {
@@ -88,6 +94,29 @@ export class DatabaseReadOnly {
       });
     });
   }
+
+  /**
+   * Scripts table
+   */
+  getScript(url: URL): Promise<string | undefined> {
+    const sql = `
+      SELECT javascript FROM scripts WHERE domainName=?;
+    `;
+
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        sql,
+        [url.hostname],
+        (err, row: ScriptsDbItem | undefined) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(row?.javascript);
+          }
+        },
+      );
+    });
+  }
 }
 
 export class Database extends DatabaseReadOnly {
@@ -120,6 +149,35 @@ export class Database extends DatabaseReadOnly {
             reject(err);
           } else {
             resolve(row.id);
+          }
+        },
+      );
+    });
+  }
+
+  updateItemPrice(
+    id: number,
+    date: Date,
+    lowestPrice: number | undefined,
+    currentPrice: number | undefined,
+    currentDiscount: number | undefined,
+  ): Promise<void> {
+    const sql = `
+      UPDATE watchlist SET
+        dateUpdated=?, lowestPrice=?, currentPrice=?, currentDiscount=?
+      WHERE id=?;
+    `;
+    const dateUpdated = util.formatDate(date);
+
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        sql,
+        [dateUpdated, lowestPrice, currentPrice, currentDiscount, id],
+        (err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
           }
         },
       );
