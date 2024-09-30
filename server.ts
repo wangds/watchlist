@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from "express";
 import { Database, DatabaseReadOnly } from "./database";
+import scrape from "./scraper";
 import util from "./util";
 
 const app: Express = express();
@@ -97,10 +98,13 @@ app.post("/api/update-item/:id", async (req: Request, res: Response) => {
       return;
     }
 
-    const result = {
-      price: 100,
-      discount: 0,
-    };
+    const result = await scrape(url, script);
+    if (!result) {
+      // Error while processing the script.
+      // return: 422 unprocessable content
+      res.status(422).send(`Error evaluating script for ${url.hostname}`);
+      return;
+    }
 
     const now = new Date();
     const lowestPrice = util.minCoalesce(item.lowestPrice, result.price);

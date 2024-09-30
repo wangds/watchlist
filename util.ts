@@ -21,7 +21,18 @@ function minCoalesce(...args: (number | undefined)[]): number | undefined {
   return nums.length > 0 ? Math.min(...nums) : undefined;
 }
 
+/**
+ * Parse the price in cents, stripping out common patterns (e.g. dollar signs).
+ * Return undefined on error.
+ */
+function parsePrice(str: string | undefined): number | undefined {
+  str = str?.replaceAll("$", " ");
+  const num = Math.round(Number(str) * 100);
+  return Number.isInteger(num) ? num : undefined;
+}
+
 export default {
   formatDate,
   minCoalesce,
+  parsePrice,
 };
