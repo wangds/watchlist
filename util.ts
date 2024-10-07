@@ -1,3 +1,7 @@
+import { ElementHandle } from "puppeteer";
+
+type TextTransform = (text: string) => string;
+
 /**
  * Return the date in YYYY-MM-DD.
  */
@@ -31,8 +35,25 @@ function parsePrice(str: string | undefined): number | undefined {
   return Number.isInteger(num) ? num : undefined;
 }
 
+/**
+ * Extract the text content from the selector and optionally transform it.
+ *
+ * Differs from Puppeteer ElementHandle.$eval() in that it doesn't throw if the
+ * selector doesn't find a node.
+ */
+async function selectTextContent(
+  selector: Promise<ElementHandle | null>,
+  transform: TextTransform | null = null,
+): Promise<string | undefined> {
+  const node = await selector;
+  let text = await node?.evaluate((node) => node.textContent);
+  if (text && transform) text = transform(text);
+  return text ?? undefined;
+}
+
 export default {
   formatDate,
   minCoalesce,
   parsePrice,
+  selectTextContent,
 };
