@@ -3,6 +3,26 @@ import { ElementHandle } from "puppeteer";
 type TextTransform = (text: string) => string;
 
 /**
+ * Find the first ancestor of a HTML element with the given HTML tag.
+ */
+function findAncestor(
+  el: HTMLElement | null,
+  tagName: string,
+): HTMLElement | null {
+  // tagName has the value "elementExample". Note that this is case-preserving
+  // in XML, as are all of the operations of the DOM. The HTML DOM returns the
+  // tagName of an HTML element in the canonical uppercase form, regardless of
+  // the case in the source HTML document.
+  //
+  //  https://www.w3.org/TR/REC-DOM-Level-1/level-one-core.html#ID-745549614
+  tagName = tagName.toUpperCase();
+  while (el && el.tagName !== tagName) {
+    el = el.parentElement;
+  }
+  return el;
+}
+
+/**
  * Return the date in YYYY-MM-DD.
  */
 function formatDate(date: Date): string {
@@ -52,6 +72,7 @@ async function selectTextContent(
 }
 
 export default {
+  findAncestor,
   formatDate,
   minCoalesce,
   parsePrice,

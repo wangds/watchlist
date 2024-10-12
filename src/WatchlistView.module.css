@@ -50,11 +50,23 @@ table.watchlist th {
 table.watchlist th:nth-child(1) {
   width: 60%;
 }
-
 table.watchlist tr:nth-child(even) {
   background-color: lightcyan;
 }
-
 table.watchlist tr:hover {
   background-color: lightyellow;
+}
+
+/* Last Updated indicator for update in progress */
+td.updating span {
+  display: none;
+}
+td.updating::before {
+  content: "Loading...";
+  animation: pulse 1.5s infinite ease-in-out;
+}
+@keyframes pulse {
+  0% { opacity: 0.2; }
+  50% { opacity: 1.0; }
+  100% { opacity: 0.2; }
 }

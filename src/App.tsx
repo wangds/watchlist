@@ -28,7 +28,7 @@ function App(): ReactNode {
 
   return (
     <>
-      <WatchlistView items={items} />
+      <WatchlistView items={items} setItems={setItems} />
     </>
   );
 }
