@@ -7,6 +7,19 @@ interface WatchlistViewProps {
 }
 
 function WatchlistView(props: WatchlistViewProps): ReactNode {
+  const items = props.items.filter((item) => item.keepMonitoring);
+  items.sort((a, b) => {
+    return (
+      // Group different sources for the same item together
+      a.description.localeCompare(b.description) ||
+      // Order items within group by increasing price
+      (a.currentPrice ?? Number.MAX_SAFE_INTEGER) -
+        (b.currentPrice ?? Number.MAX_SAFE_INTEGER) ||
+      // Order items within group with same price by source
+      a.url.localeCompare(b.url)
+    );
+  });
+
   return (
     <table className={styles.watchlist}>
       <thead>
@@ -19,7 +32,7 @@ function WatchlistView(props: WatchlistViewProps): ReactNode {
           <th>Discount</th>
         </tr>
       </thead>
-      <tbody>{props.items.map((item) => WatchlistViewRow(item))}</tbody>
+      <tbody>{items.map((item) => WatchlistViewRow(item))}</tbody>
     </table>
   );
 }
