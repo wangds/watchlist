@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import { WatchlistDbItem } from "../database";
+import InsertItemView from "./InsertItemView";
 import WatchlistView from "./WatchlistView";
 import "./App.css";
 
@@ -29,6 +30,9 @@ function App(): ReactNode {
   return (
     <>
       <WatchlistView items={items} setItems={setItems} />
+      <div className="card">
+        <InsertItemView items={items} setItems={setItems} />
+      </div>
     </>
   );
 }
