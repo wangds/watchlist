@@ -56,6 +56,26 @@ function parsePrice(str: string | undefined): number | undefined {
 }
 
 /**
+ * Extract the attribute from the selector and optionally transform it.
+ *
+ * Differs from Puppeteer ElementHandle.$eval() in that it doesn't throw if the
+ * selector doesn't find a node.
+ */
+async function selectAttribute(
+  selector: Promise<ElementHandle | null>,
+  attr: string,
+  transform: TextTransform | null = null,
+): Promise<string | undefined> {
+  const node = await selector;
+  let text = await node?.evaluate(
+    (node, attr) => node.getAttribute(attr),
+    attr,
+  );
+  if (text && transform) text = transform(text);
+  return text ?? undefined;
+}
+
+/**
  * Extract the text content from the selector and optionally transform it.
  *
  * Differs from Puppeteer ElementHandle.$eval() in that it doesn't throw if the
@@ -83,6 +103,7 @@ export default {
   formatDate,
   minCoalesce,
   parsePrice,
+  selectAttribute,
   selectTextContent,
   trimEndMultiline,
 };
