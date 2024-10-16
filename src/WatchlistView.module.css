@@ -6,7 +6,8 @@ span.linkhost {
 
 table.watchlist {
   border: 1px solid;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   width: 100%;
 }
 
@@ -43,7 +44,9 @@ table.watchlist td:nth-child(6) {
 table.watchlist th {
   background-color: lightgrey;
   border-bottom: 1px solid;
+  position: sticky;
   text-align: center;
+  top: 0;
 }
 
 /* Item */
