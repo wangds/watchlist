@@ -1,4 +1,5 @@
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import util from "./util";
 
 // Shim for allowing async function creation via new Function
@@ -10,6 +11,8 @@ interface ScrapeResult {
   price: number | undefined;
   discount: number | undefined;
 }
+
+puppeteer.use(StealthPlugin());
 
 /**
  * Evaluate a script on this page to extract information.
@@ -28,7 +31,7 @@ async function scrape(
 ): Promise<ScrapeResult | undefined> {
   let browser;
   try {
-    browser = await puppeteer.launch();
+    browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     // Setting the default timeout to 10 seconds (10000 milliseconds)
