@@ -38,6 +38,7 @@ app.put("/api/item", async (req: Request, res: Response) => {
     db = Database.open();
     const id = await db.insertItem(body.description, url);
     const insertedItem = await db.getItem(id);
+    await db.insertScriptIfNotExist(url);
 
     // Everything went smoothly.
     // return 200 ok and new WatchlistItem.

@@ -183,4 +183,30 @@ export class Database extends DatabaseReadOnly {
       );
     });
   }
+
+  /**
+   * Scripts table
+   */
+  insertScriptIfNotExist(url: URL): Promise<void> {
+    const sql = `
+      INSERT OR IGNORE INTO scripts(domainName, javascript) VALUES (?,?);
+    `;
+
+    const template = `
+      const price = undefined;
+      const discount = undefined;
+      return { price, discount };
+    `;
+    const script = template.replace(/\n\s{6}/g, "\n").trim();
+
+    return new Promise((resolve, reject) => {
+      this.db.run(sql, [url.hostname, script], (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
 }
