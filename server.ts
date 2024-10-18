@@ -184,4 +184,34 @@ app.post("/api/update-item/:id", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * Get the script for the given URI (encoded by encodeURIComponent).
+ */
+app.get("/api/script/:uri", async (req: Request, res: Response) => {
+  let db;
+  try {
+    const uri = decodeURIComponent(req.params.uri);
+    if (!URL.canParse(uri)) {
+      // Data validation failed.
+      // return: 400 bad request.
+      res.status(400).send();
+      return;
+    }
+
+    const url = new URL(uri);
+
+    db = DatabaseReadOnly.open();
+    const script = await db.getScript(url);
+
+    res.status(200).send(script);
+  } catch (err: unknown) {
+    // Unknown exception.
+    // return: 500 internal server error.
+    console.error(err);
+    res.status(500).send(err);
+  } finally {
+    db?.close();
+  }
+});
+
 export default app as unknown as () => void;
