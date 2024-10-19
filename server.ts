@@ -5,6 +5,7 @@ import util from "./util";
 
 const app: Express = express();
 app.use(express.json());
+app.use(express.text());
 
 Database.create();
 
@@ -204,6 +205,37 @@ app.get("/api/script/:uri", async (req: Request, res: Response) => {
     const script = await db.getScript(url);
 
     res.status(200).send(script);
+  } catch (err: unknown) {
+    // Unknown exception.
+    // return: 500 internal server error.
+    console.error(err);
+    res.status(500).send(err);
+  } finally {
+    db?.close();
+  }
+});
+
+/**
+ * Replace the script for the given URI (encoded by encodeURIComponent).
+ */
+app.post("/api/edit-script/:uri", async (req: Request, res: Response) => {
+  let db;
+  try {
+    const uri = decodeURIComponent(req.params.uri);
+    if (req.body === undefined || !URL.canParse(uri)) {
+      // Data validation failed.
+      // return: 400 bad request.
+      res.status(400).send();
+      return;
+    }
+
+    const url = new URL(uri);
+    const script = req.body as string;
+
+    db = Database.open();
+    await db.insertOrUpdateScript(url, script);
+
+    res.status(200).send();
   } catch (err: unknown) {
     // Unknown exception.
     // return: 500 internal server error.

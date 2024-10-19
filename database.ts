@@ -221,4 +221,21 @@ export class Database extends DatabaseReadOnly {
       });
     });
   }
+
+  insertOrUpdateScript(url: URL, script: string): Promise<void> {
+    const sql = `
+      INSERT INTO scripts(domainName, javascript) VALUES (?,?)
+      ON CONFLICT DO UPDATE SET javascript=?2;
+    `;
+
+    return new Promise((resolve, reject) => {
+      this.db.run(sql, [url.hostname, script], (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
 }
