@@ -9,6 +9,56 @@ app.use(express.json());
 Database.create();
 
 /**
+ * Edit an item in the watchlist.
+ * Returns the updated WatchlistItem.
+ */
+interface EditItemInterface {
+  keepMonitoring?: boolean;
+}
+
+app.post("/api/edit-item/:id", async (req: Request, res: Response) => {
+  let db;
+  try {
+    const id = Number(req.params.id);
+    if (req.body === undefined) {
+      // Data validation failed.
+      // return: 400 bad request.
+      res.status(400).send();
+      return;
+    }
+
+    db = DatabaseReadOnly.open();
+    const item = await db.getItem(id);
+    if (!item) {
+      // Item not found, so nothing to update!
+      // return: 204 no content.
+      res.status(204).send();
+      return;
+    }
+
+    const body = req.body as EditItemInterface;
+    if (typeof body.keepMonitoring === "boolean") {
+      db.close();
+      db = Database.open();
+      await db.updateItemMonitoring(id, body.keepMonitoring);
+    }
+
+    const updatedItem = await db.getItem(id);
+
+    // Everything went smoothly.
+    // return 200 ok and updated WatchlistItem.
+    res.status(200).send(updatedItem);
+  } catch (err: unknown) {
+    // Unknown exception.
+    // return: 500 internal server error.
+    console.error(err);
+    res.status(500).send(err);
+  } finally {
+    db?.close();
+  }
+});
+
+/**
  * Insert a new item (description and url) into the watchlist.
  * Returns the new WatchlistItem.
  */

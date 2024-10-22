@@ -21,6 +21,8 @@ const DatabaseSchema = `
   );
 `;
 
+type SqlDataType = boolean | number | string | null;
+
 export interface WatchlistDbItem {
   id: number;
   description: string;
@@ -155,6 +157,30 @@ export class Database extends DatabaseReadOnly {
     });
   }
 
+  #updateItem(id: number, map: Map<string, SqlDataType>): Promise<void> {
+    const entries = Array.from(map.entries());
+    const keys = entries.map((kvp) => `${kvp[0]}=?`).join(", ");
+    const vals = entries.map((kvp) => kvp[1]);
+
+    const sql = `UPDATE watchlist SET ${keys} WHERE id=?`;
+
+    return new Promise((resolve, reject) => {
+      this.db.run(sql, [...vals, id], (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  updateItemMonitoring(id: number, keepMonitoring: boolean): Promise<void> {
+    const map = new Map<string, SqlDataType>();
+    map.set("keepMonitoring", keepMonitoring);
+    return this.#updateItem(id, map);
+  }
+
   updateItemPrice(
     id: number,
     date: Date,
@@ -162,26 +188,12 @@ export class Database extends DatabaseReadOnly {
     currentPrice: number | undefined,
     currentDiscount: number | undefined,
   ): Promise<void> {
-    const sql = `
-      UPDATE watchlist SET
-        dateUpdated=?, lowestPrice=?, currentPrice=?, currentDiscount=?
-      WHERE id=?;
-    `;
-    const dateUpdated = util.formatDate(date);
-
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        sql,
-        [dateUpdated, lowestPrice, currentPrice, currentDiscount, id],
-        (err) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        },
-      );
-    });
+    const map = new Map<string, SqlDataType>();
+    map.set("dateUpdated", util.formatDate(date));
+    map.set("lowestPrice", lowestPrice ?? null);
+    map.set("currentPrice", currentPrice ?? null);
+    map.set("currentDiscount", currentDiscount ?? null);
+    return this.#updateItem(id, map);
   }
 
   /**
