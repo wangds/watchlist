@@ -27,7 +27,7 @@ function WatchlistView(props: WatchlistViewProps): ReactNode {
       <thead>
         <tr>
           <th>Item</th>
-          <th>⏸</th>
+          <th>👀</th>
           <th
             className="clickable"
             onClick={(evt) => {
@@ -58,7 +58,17 @@ function WatchlistViewRow(
           (<a href={item.url}>{new URL(item.url).hostname}</a>)
         </span>
       </td>
-      <td>{item.keepMonitoring ? "⏺" : "⏸"}</td>
+      <td>
+        <input
+          name="keepMonitoring"
+          type="checkbox"
+          className="clickable"
+          defaultChecked={item.keepMonitoring}
+          onChange={(evt) => {
+            toggleMonitorItem(evt.target as HTMLElement, props);
+          }}
+        />
+      </td>
       <td>
         <span
           className="clickable"
@@ -80,6 +90,29 @@ function formatPrice(cents?: number): string {
   return cents && cents > 0 ? `$${(cents / 100).toFixed(2)}` : "-";
 }
 
+function toggleMonitorItem(el: HTMLElement, props: WatchlistViewProps): void {
+  const tr = util.findAncestor(el, "tr");
+  const itemId = tr?.dataset.itemId;
+  const item = props.items.find((item) => item.id === Number(itemId));
+  if (!itemId || !item) return;
+
+  fetch(`/api/edit-item/${itemId}`, {
+    method: "POST",
+    headers: {
+      "Content-type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify({
+      keepMonitoring: !item.keepMonitoring,
+    }),
+  })
+    .then(async (res) => {
+      await replaceItem(res, props);
+    })
+    .catch((err: unknown) => {
+      console.error(err);
+    });
+}
+
 function updateItem(el: HTMLElement | null, props: WatchlistViewProps): void {
   const td = util.findAncestor(el, "td");
   const tr = util.findAncestor(td, "tr");
@@ -93,13 +126,7 @@ function updateItem(el: HTMLElement | null, props: WatchlistViewProps): void {
     method: "POST",
   })
     .then(async (res) => {
-      const replacement = (await res.json()) as WatchlistDbItem;
-
-      // Queue an updater function instead of replacing the state to avoid
-      // concurrent updates clobberring each other's updates.
-      props.setItems((items) =>
-        items.map((item) => (item.id === replacement.id ? replacement : item)),
-      );
+      await replaceItem(res, props);
     })
     .catch((err: unknown) => {
       console.error(err);
@@ -122,6 +149,16 @@ function updateItems(el: HTMLElement, props: WatchlistViewProps): void {
       updateItem(tr.querySelector("span.clickable"), props);
     }
   });
+}
+
+async function replaceItem(res: Response, props: WatchlistViewProps) {
+  const replacement = (await res.json()) as WatchlistDbItem;
+
+  // Queue an updater function instead of replacing the state to avoid
+  // concurrent updates clobberring each other's updates.
+  props.setItems((items) =>
+    items.map((item) => (item.id === replacement.id ? replacement : item)),
+  );
 }
 
 export default WatchlistView;
