@@ -1,4 +1,4 @@
-import { Dispatch, ReactNode, SetStateAction } from "react";
+import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import { WatchlistDbItem } from "../database";
 import util from "../util";
 import styles from "./WatchlistView.module.css";
@@ -8,8 +8,45 @@ interface WatchlistViewProps {
   setItems: Dispatch<SetStateAction<WatchlistDbItem[]>>;
 }
 
+const enum MonitorFilter {
+  All = 0,
+  Monitored,
+  Unmonitored,
+}
+
 function WatchlistView(props: WatchlistViewProps): ReactNode {
-  const items = props.items.filter((item) => item.keepMonitoring);
+  const [itemFilter, setItemFilter] = useState("");
+  const [monitorFilter, setMonitorFilter] = useState(MonitorFilter.Monitored);
+  const [dateFilter, setDateFilter] = useState(false);
+  const [discountFilter, setDiscountFilter] = useState(false);
+
+  const mostRecent = dateFilter ? findMostRecentDateUpdated(props) : "";
+  const items = props.items.filter((item) => {
+    if (monitorFilter) {
+      if (monitorFilter === MonitorFilter.Monitored && !item.keepMonitoring)
+        return false;
+      if (monitorFilter === MonitorFilter.Unmonitored && item.keepMonitoring)
+        return false;
+    }
+
+    if (dateFilter && item.dateUpdated !== mostRecent) {
+      return false;
+    }
+
+    if (discountFilter && (item.currentDiscount ?? 0) <= 0) {
+      return false;
+    }
+
+    if (itemFilter.trim()) {
+      const str = itemFilter.toLocaleLowerCase();
+      if (
+        !item.description.toLocaleLowerCase().includes(str) &&
+        !item.url.toLocaleLowerCase().includes(str)
+      )
+        return false;
+    }
+    return true;
+  });
   items.sort((a, b) => {
     return (
       // Group different sources for the same item together
@@ -26,7 +63,7 @@ function WatchlistView(props: WatchlistViewProps): ReactNode {
     <table className={styles.watchlist}>
       <thead>
         <tr>
-          <th>Item</th>
+          <th className={styles.item}>Item</th>
           <th>👀</th>
           <th
             className="clickable"
@@ -34,11 +71,61 @@ function WatchlistView(props: WatchlistViewProps): ReactNode {
               updateItems(evt.target as HTMLElement, props);
             }}
           >
-            Last Updated
+            Updated
           </th>
-          <th>Historical Low</th>
-          <th>Current Price</th>
+          <th className={styles.borderBottom} rowSpan={2}>
+            Historical Low
+          </th>
+          <th className={styles.borderBottom} rowSpan={2}>
+            Current Price
+          </th>
           <th>Discount</th>
+        </tr>
+        <tr>
+          <th className={[styles.item, styles.borderBottom].join(" ")}>
+            <input
+              id="itemFilter"
+              type="text"
+              value={itemFilter}
+              onChange={(evt) => {
+                setItemFilter(evt.target.value);
+              }}
+              placeholder="containing…"
+            />
+          </th>
+          <th className={styles.borderBottom}>
+            <select
+              id="monitorFilter"
+              value={monitorFilter}
+              onChange={(evt) => {
+                setMonitorFilter(Number(evt.target.value));
+              }}
+            >
+              <option value={MonitorFilter.All}>*</option>
+              <option value={MonitorFilter.Monitored}>✓</option>
+              <option value={MonitorFilter.Unmonitored}>✗</option>
+            </select>
+          </th>
+          <th className={styles.borderBottom}>
+            <input
+              id="dateFilter"
+              type="checkbox"
+              checked={dateFilter}
+              onChange={(evt) => {
+                setDateFilter(evt.target.checked);
+              }}
+            />
+          </th>
+          <th className={styles.borderBottom}>
+            <input
+              id="discountFilter"
+              type="checkbox"
+              checked={discountFilter}
+              onChange={(evt) => {
+                setDiscountFilter(evt.target.checked);
+              }}
+            />
+          </th>
         </tr>
       </thead>
       <tbody>{items.map((item) => WatchlistViewRow(props, item))}</tbody>
@@ -84,6 +171,12 @@ function WatchlistViewRow(
       <td>{formatPrice(item.currentDiscount)}</td>
     </tr>
   );
+}
+
+function findMostRecentDateUpdated(props: WatchlistViewProps): string {
+  return props.items
+    .map((item) => item.dateUpdated ?? "")
+    .reduce((a, b) => (a >= b ? a : b), "");
 }
 
 function formatPrice(cents?: number): string {

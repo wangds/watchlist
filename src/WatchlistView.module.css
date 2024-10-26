@@ -11,8 +11,7 @@ table.watchlist {
   width: 100%;
 }
 
-table.watchlist td,
-table.watchlist th {
+table.watchlist td {
   padding: 0.5em 1em;
 }
 
@@ -42,21 +41,20 @@ table.watchlist td:nth-child(6) {
 }
 
 table.watchlist th {
+  padding: 0 1em;
+}
+
+table.watchlist thead {
   background-color: lightgrey;
-  border-bottom: 1px solid;
   position: sticky;
   text-align: center;
   top: 0;
 }
 
-/* Item */
-table.watchlist th:nth-child(1) {
-  width: 60%;
-}
-table.watchlist tr:nth-child(even) {
+table.watchlist tbody tr:nth-child(even) {
   background-color: lightcyan;
 }
-table.watchlist tr:hover {
+table.watchlist tbody tr:hover {
   background-color: lightyellow;
 }
 
@@ -72,4 +70,16 @@ td.updating::before {
   0% { opacity: 0.2; }
   50% { opacity: 1.0; }
   100% { opacity: 0.2; }
+}
+
+th.borderBottom {
+  border-bottom: 1px solid black;
+}
+
+th.item {
+  width: 60%;
+}
+th.item input {
+  width: 100%;
+  border: 1px solid #767676;
 }
