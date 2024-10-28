@@ -146,15 +146,17 @@ function WatchlistViewRow(
         </span>
       </td>
       <td>
-        <input
-          name="keepMonitoring"
-          type="checkbox"
-          className="clickable"
-          defaultChecked={item.keepMonitoring}
-          onChange={(evt) => {
-            toggleMonitorItem(evt.target as HTMLElement, props);
-          }}
-        />
+        <label className="switch">
+          <input
+            name="keepMonitoring"
+            type="checkbox"
+            defaultChecked={item.keepMonitoring}
+            onChange={(evt) => {
+              toggleMonitorItem(evt.target as HTMLElement, props);
+            }}
+          />
+          <span className="slider" />
+        </label>
       </td>
       <td>
         <span

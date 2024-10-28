@@ -49,6 +49,7 @@ table.watchlist thead {
   position: sticky;
   text-align: center;
   top: 0;
+  z-index: 1;
 }
 
 table.watchlist tbody tr:nth-child(even) {
