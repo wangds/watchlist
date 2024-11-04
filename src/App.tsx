@@ -6,8 +6,9 @@ import {
   useState,
 } from "react";
 import { WatchlistDbItem } from "../database";
+import EditScriptView from "./EditScriptView";
 import InsertItemView from "./InsertItemView";
-import NavbarView from "./NavbarView";
+import NavbarView, { EditScriptPage } from "./NavbarView";
 import WatchlistView from "./WatchlistView";
 import "./App.css";
 
@@ -30,15 +31,30 @@ function App(): ReactNode {
     });
   }, []);
 
-  return (
-    <>
-      <NavbarView currentPage={currentPage} />
-      <WatchlistView items={items} setItems={setItems} />
-      <div className="card">
-        <InsertItemView items={items} setItems={setItems} />
-      </div>
-    </>
-  );
+  const navbar = <NavbarView currentPage={currentPage} />;
+
+  if (currentPage === EditScriptPage) {
+    return (
+      <>
+        {navbar}
+        <div className="grid">
+          <div className="card">
+            <EditScriptView items={items} />
+          </div>
+        </div>
+      </>
+    );
+  } else {
+    return (
+      <>
+        {navbar}
+        <WatchlistView items={items} setItems={setItems} />
+        <div className="card">
+          <InsertItemView items={items} setItems={setItems} />
+        </div>
+      </>
+    );
+  }
 }
 
 /**

@@ -13,6 +13,11 @@
   cursor: pointer;
 }
 
+.grid {
+  display: grid;
+  grid-template-columns: min-content auto;
+}
+
 /* Slider switch */
 .switch {
   display: inline-block;
