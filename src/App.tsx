@@ -7,6 +7,7 @@ import {
 } from "react";
 import { WatchlistDbItem } from "../database";
 import EditScriptView from "./EditScriptView";
+import HintView from "./HintView";
 import InsertItemView from "./InsertItemView";
 import NavbarView, { EditScriptPage } from "./NavbarView";
 import WatchlistView from "./WatchlistView";
@@ -40,6 +41,9 @@ function App(): ReactNode {
         <div className="grid">
           <div className="card">
             <EditScriptView items={items} />
+          </div>
+          <div className="card">
+            <HintView />
           </div>
         </div>
       </>
