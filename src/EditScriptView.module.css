@@ -9,3 +9,27 @@ form.editScript textarea {
   margin-left: 2ch;
   text-wrap: nowrap;
 }
+
+span.checkmark {
+  line-height: 175%;
+  margin-left: 10px;
+}
+span.checkmark span {
+  border-radius: 50%;
+  font-size: 175%;
+  height: 1.75ch;
+  opacity: 0;
+  position: absolute;
+  text-align: center;
+  width: 1.75ch;
+}
+span.checkmark span.success {
+  border: 3px solid green;
+  color: green;
+
+  animation: fade 2s linear;
+}
+@keyframes fade {
+  0% { opacity: 1 }
+  100% { opacity: 0 }
+}

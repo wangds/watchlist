@@ -1,5 +1,6 @@
 import {
   Dispatch,
+  FormEvent,
   ReactNode,
   SetStateAction,
   useEffect,
@@ -33,7 +34,12 @@ function EditScriptView(props: EditScriptViewProps): ReactNode {
   return (
     <>
       <h3>Script</h3>
-      <form className={styles.editScript}>
+      <form
+        className={styles.editScript}
+        onSubmit={(evt) => {
+          saveChanges(evt);
+        }}
+      >
         <label htmlFor="site">Site:</label>
         <select
           id="site"
@@ -58,6 +64,9 @@ function EditScriptView(props: EditScriptViewProps): ReactNode {
         </pre>
 
         <button type="submit">Save changes</button>
+        <span className={styles.checkmark}>
+          <span>✓</span>
+        </span>
       </form>
     </>
   );
@@ -83,6 +92,31 @@ function onChangeSite(
       const script = await res.text();
       setSite(site);
       textarea.value = script;
+    })
+    .catch((err: unknown) => {
+      console.error(err);
+    });
+}
+
+function saveChanges(evt: FormEvent): void {
+  evt.preventDefault();
+
+  const form: HTMLFormElement = evt.target as HTMLFormElement;
+  const site = (form.site as HTMLSelectElement).value;
+  const checkmark = form.querySelector(`span.${styles.checkmark} > span`);
+  if (!checkmark) return;
+
+  const uri = encodeURIComponent(`https://${site}`);
+  const script = form.querySelector("textarea")?.value ?? "";
+
+  checkmark.className = "";
+
+  fetch(`/api/edit-script/${uri}`, {
+    method: "POST",
+    body: script,
+  })
+    .then((res) => {
+      if (res.status === 200) checkmark.className = styles.success;
     })
     .catch((err: unknown) => {
       console.error(err);
