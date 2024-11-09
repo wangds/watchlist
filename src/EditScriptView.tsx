@@ -91,7 +91,7 @@ function onChangeSite(
     .then(async (res) => {
       const script = await res.text();
       setSite(site);
-      textarea.value = script;
+      textarea.value = util.trimEndMultiline(script);
     })
     .catch((err: unknown) => {
       console.error(err);
@@ -107,7 +107,9 @@ function saveChanges(evt: FormEvent): void {
   if (!checkmark) return;
 
   const uri = encodeURIComponent(`https://${site}`);
-  const script = form.querySelector("textarea")?.value ?? "";
+  const script = util.trimEndMultiline(
+    form.querySelector("textarea")?.value ?? "",
+  );
 
   checkmark.className = "";
 

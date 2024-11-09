@@ -71,10 +71,18 @@ async function selectTextContent(
   return text ?? undefined;
 }
 
+/**
+ * Trim whitespace characters from the ends of all lines in a multiline string.
+ */
+function trimEndMultiline(str: string): string {
+  return str.trimEnd().replace(/[^\S\n]+\n/g, "\n");
+}
+
 export default {
   findAncestor,
   formatDate,
   minCoalesce,
   parsePrice,
   selectTextContent,
+  trimEndMultiline,
 };
