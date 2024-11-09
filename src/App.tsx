@@ -7,6 +7,7 @@ import {
 } from "react";
 import { WatchlistDbItem } from "../database";
 import InsertItemView from "./InsertItemView";
+import NavbarView from "./NavbarView";
 import WatchlistView from "./WatchlistView";
 import "./App.css";
 
@@ -21,6 +22,8 @@ function App(): ReactNode {
   const cacheRef = useRef<Cache>({});
   const [items, setItems] = useState<WatchlistDbItem[]>([]);
 
+  const currentPage = new URL(document.URL).pathname;
+
   useEffect(() => {
     fetchCached(cacheRef, "/api/items", (res) => {
       setItems(res as WatchlistDbItem[]);
@@ -29,6 +32,7 @@ function App(): ReactNode {
 
   return (
     <>
+      <NavbarView currentPage={currentPage} />
       <WatchlistView items={items} setItems={setItems} />
       <div className="card">
         <InsertItemView items={items} setItems={setItems} />

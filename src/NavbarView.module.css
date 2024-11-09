@@ -1,0 +1,29 @@
+.navbar {
+  padding-bottom: 1px;
+  position: fixed;
+  transform-origin: bottom right;
+  transform: translate(-100%, -100%) rotate(-90deg);
+  width: max-content;
+}
+
+.navbar a {
+  background-color: lightgrey;
+  border: #ccc 1px solid;
+  border-radius: 5px;
+  color: black;
+  cursor: pointer;
+  line-height: 175%;
+  padding: 3px 12px;
+}
+
+.navbar a.current {
+  background-color: #08c;
+  border: #08c 1px solid;
+  color: white;
+}
+
+.navbar a:hover {
+  background-color: #07b;
+  border: #07b 1px solid;
+  color: white;
+}
