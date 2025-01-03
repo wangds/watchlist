@@ -51,6 +51,7 @@ function minCoalesce(...args: (number | undefined)[]): number | undefined {
  */
 function parsePrice(str: string | undefined): number | undefined {
   str = str?.replaceAll("$", " ");
+  str = str?.replaceAll(",", "");
   const num = Math.round(Number(str) * 100);
   return Number.isInteger(num) ? num : undefined;
 }
