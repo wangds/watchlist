@@ -237,12 +237,28 @@ function updateItems(el: HTMLElement, props: WatchlistViewProps): void {
 
   // Update visible items that are not recent and not currently updating
   const today = util.formatDate(new Date());
-  table.querySelectorAll(`tbody > tr`).forEach((tr) => {
-    const itemId = Number((tr as HTMLElement).dataset.itemId);
-    const item = props.items.find((item) => item.id === itemId);
-    if (item && item.keepMonitoring && item.dateUpdated !== today) {
-      updateItem(tr.querySelector("span.clickable"), props);
-    }
+
+  const items = Array.from(table.querySelectorAll(`tbody > tr`)).flatMap(
+    (tr) => {
+      const itemId = Number((tr as HTMLElement).dataset.itemId);
+      const item = props.items.find((item) => item.id === itemId);
+      if (item && item.keepMonitoring && item.dateUpdated !== today) {
+        return [{ tr, dateUpdated: item.dateUpdated }];
+      } else {
+        return [];
+      }
+    },
+  );
+
+  items.sort((a, b) => {
+    if (a.dateUpdated === b.dateUpdated) return 0;
+    if (a.dateUpdated === undefined) return -1;
+    if (b.dateUpdated === undefined) return 1;
+    return a.dateUpdated < b.dateUpdated ? -1 : 1;
+  });
+
+  items.forEach((pair) => {
+    updateItem(pair.tr.querySelector("span.clickable"), props);
   });
 }
 
