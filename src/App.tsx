@@ -1,10 +1,4 @@
-import {
-  MutableRefObject,
-  ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, RefObject, useEffect, useRef, useState } from "react";
 import { WatchlistDbItem } from "../database";
 import EditScriptView from "./EditScriptView";
 import HintView from "./HintView";
@@ -66,7 +60,7 @@ function App(): ReactNode {
  * Persists the fetch result into cacheRef.
  */
 function fetchCached(
-  cacheRef: MutableRefObject<Cache>,
+  cacheRef: RefObject<Cache>,
   url: string,
   callback: (res: object) => void,
 ): void {
